@@ -1,14 +1,22 @@
-name: todos_repository
-description: A starting point for Dart libraries or applications.
-# version: 1.0.0
-# homepage: https://www.example.com
+name: todos_repository_local_storage
+description: An app-agnostic data source that can be used by all implementations
 
 environment:
-  sdk: '>=2.7.0 <3.0.0'
+  sdk: '>=2.2.2 <3.0.0'
 
-#dependencies:
-#  path: ^1.6.0
+dependencies:
+  flutter:
+    sdk: flutter
+  todos_repository_core:
+    git:
+      url: https://github.com/felangel/flutter_architecture_samples
+      path: todos_repository_core
+      ref: rxdart/0.23.0
+  rxdart: ^0.23.1
+  key_value_store:
 
 dev_dependencies:
-  pedantic: ^1.8.0
-  test: ^1.6.0
+  test:
+  flutter_test:
+    sdk: flutter
+  mockito:
