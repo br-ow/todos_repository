@@ -1,10 +1,17 @@
 // Copyright 2018 The Flutter Architecture Sample Authors. All rights reserved.
 // Use of this source code is governed by the MIT license that can be found
 // in the LICENSE file.
-
+import 'dart:convert';
 import 'dart:async';
 
 import 'package:todos_repository_core/todos_repository_core.dart';
+import 'package:http/http.dart' as http;
+
+enum HttpRequestStatus {
+  NOT_DONE,
+  DONE,
+  ERROR
+}
 
 /// A class that is meant to represent a Client that would be used to call a Web
 /// Service. It is responsible for fetching and persisting Todos to and from the
@@ -14,52 +21,129 @@ import 'package:todos_repository_core/todos_repository_core.dart';
 /// a real server but simply emulates the functionality.
 class WebClient implements TodosRepository {
   final Duration delay;
+  static const _todosUrl = 'http://localhost:8888/todos';
+  static final _headers = {'Content-Type': 'application/json'};
+
 
   const WebClient([this.delay = const Duration(milliseconds: 3000)]);
 
-  /// Mock that "fetches" some Todos from a "web service" after a short delay
+  /// fetches some Todos from web service
   @override
   Future<List<TodoEntity>> loadTodos() async {
-    return Future.delayed(
-        delay,
-        () => [
-              TodoEntity(
-                'Buy food for da kitty',
-                '1',
-                'With the chickeny bits!',
-                false,
-              ),
-              TodoEntity(
-                'Find a Red Sea dive trip',
-                '2',
-                'Echo vs MY Dream',
-                false,
-              ),
-              TodoEntity(
-                'Book flights to Egypt',
-                '3',
-                '',
-                true,
-              ),
-              TodoEntity(
-                'Decide on accommodation',
-                '4',
-                '',
-                false,
-              ),
-              TodoEntity(
-                'Sip Margaritas',
-                '5',
-                'on the beach',
-                true,
-              ),
-            ]);
+    final response = await http.get(_todosUrl);
+    print(response.body);
+    List responseJson = json.decode(response.body.toString());
+    List<TodoEntity> todoList = createTodoList(responseJson);
+    return todoList;
   }
 
-  /// Mock that returns true or false for success or failure. In this case,
-  /// it will "Always Succeed"
+List<TodoEntity> createTodoList(List data) {
+  List<TodoEntity> list = new List();
+
+  for (int i = 0; i < data.length; i++) {
+    String task = data[i]["task"];
+    String id = data[i]["id"].toString();
+    String note = data[i]["note"];
+    bool complete = data[i]["complete"];
+    TodoEntity todo = new TodoEntity(task, id, note, complete);
+    list.add(todo);
+  }
+
+  return list;
+}
+
+  /// Compare the list of todos kept locally with the repo
+  /// and update the repo to match.
   @override
   Future<bool> saveTodos(List<TodoEntity> todos) async {
-    return Future.value(true);
+    //HttpRequestStatus httpRequestStatus = HttpRequestStatus.NOT_DONE;
+    bool noErrors = true;
+    final response = await http.get(_todosUrl);
+    print(response.body);
+    List responseJson = json.decode(response.body.toString());
+    List<TodoEntity> repoList = createTodoList(responseJson);
+    List<TodoEntity> temp_todos;
+    //delete first
+    for (var todo in repoList) {
+      temp_todos = []..addAll(todos);
+      temp_todos.retainWhere((element) => element.id == todo.id);
+      if (temp_todos.isEmpty) {
+        if (deleteTodo(todo).toString() == 'false') {
+          noErrors = false;
+        }
+        repoList.remove(todo);
+      }
+    }
+
+    //add and update
+    for (var todo in todos) {
+      temp_todos = []..addAll(repoList);
+      temp_todos.retainWhere((element) => element.id == todo.id);
+      if (temp_todos.isNotEmpty) {
+        //just update
+        if (updateTodo(todo).toString() == 'false') {
+          noErrors = false;
+        }
+
+      }
+      else {
+        //time to add
+        if (addTodo(todo).toString() == 'false') {
+          noErrors = false;
+        }
+      }
+    }
+    return Future.value(noErrors);
   }
+
+  //Add a todo to the repo
+  Future<bool> addTodo(TodoEntity todo) async {
+    bool success = false;
+    final response = await http.post(_todosUrl,
+        headers: _headers, body: json.encode({'task': todo.task, 'complete': todo.complete, 'note': todo.note}));
+    if (response.statusCode == 200) {
+      print(response.body.toString());
+      success = true;
+    } else {
+      success = false;
+      print('WebClient.addTodo: HTTP Post Request Error');
+    }
+
+    return success;
+  }
+
+  //Update a todo in the repo
+  Future<bool> updateTodo(TodoEntity todo) async {
+    bool success = false;
+    int id = int.parse(todo.id);
+    final url = '$_todosUrl/$id';
+    final response = await http.put(url,
+        headers: _headers, body: json.encode({'id': id, 'task': todo.task, 'complete': todo.complete, 'note': todo.note}));
+    if (response.statusCode == 200) {
+      print(response.body.toString());
+      success = true;
+    } else {
+      success = false;
+      print('WebClient.updateTodo: unable to update todo');
+    }
+  }
+
+  //Delete a todo from the repo
+  Future<bool> deleteTodo(TodoEntity todo) async {
+    bool success = false;
+    int id = int.parse(todo.id);
+    final url = '$_todosUrl/$id';
+    final response = await http.delete(url, headers: _headers);
+    if (response.statusCode == 200) {
+      print(response.body.toString());
+      success = true;
+    } else {
+      //throw Exception('Failed to delete data');
+      success = false;
+      print('WebClient.deleteTodo: failed to delete data');
+    }
+
+    return success;
+  }
+
 }

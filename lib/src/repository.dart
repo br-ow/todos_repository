@@ -13,12 +13,9 @@ import 'web_client.dart';
 /// clear responsibility: Load Todos and Persist todos.
 class LocalStorageRepository implements TodosRepository {
   final TodosRepository localStorage;
-  final TodosRepository webClient;
+  final TodosRepository webClient = WebClient();
 
-  const LocalStorageRepository({
-    @required this.localStorage,
-    this.webClient = const WebClient(),
-  });
+  LocalStorageRepository({@required this.localStorage, webClient = const WebClient()});
 
   /// Loads todos first from File storage. If they don't exist or encounter an
   /// error, it attempts to load the Todos from a Web Client.
