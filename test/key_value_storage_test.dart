@@ -6,7 +6,7 @@ import 'package:key_value_store/key_value_store.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 import 'package:todos_repository_core/todos_repository_core.dart';
-import 'package:todos_repository_local_storage/todos_repository_local_storage.dart';
+import 'package:todos_repository_simple/todos_repository_simple.dart';
 
 class MockKeyValueStore extends Mock implements KeyValueStore {}
 
