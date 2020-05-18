@@ -100,7 +100,7 @@ List<TodoEntity> createTodoList(List data) {
   Future<bool> addTodo(TodoEntity todo) async {
     bool success = false;
     final response = await http.post(_todosUrl,
-        headers: _headers, body: json.encode({'task': todo.task, 'complete': todo.complete, 'note': todo.note}));
+        headers: _headers, body: json.encode({'task': todo.task, 'complete': todo.complete, 'note': todo.note, 'goal_id': 0, 'key_result_id': 0, 'team_id': 0, 'user_id': 0}));
     if (response.statusCode == 200) {
       print(response.body.toString());
       success = true;
