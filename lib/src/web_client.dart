@@ -118,7 +118,7 @@ List<TodoEntity> createTodoList(List data) {
     int id = int.parse(todo.id);
     final url = '$_todosUrl/$id';
     final response = await http.put(url,
-        headers: _headers, body: json.encode({'id': id, 'task': todo.task, 'complete': todo.complete, 'note': todo.note}));
+        headers: _headers, body: json.encode({'task': todo.task, 'complete': todo.complete, 'note': todo.note, 'goal_id': 0, 'key_result_id': 0, 'team_id': 0, 'user_id': 0}));
     if (response.statusCode == 200) {
       print(response.body.toString());
       success = true;
