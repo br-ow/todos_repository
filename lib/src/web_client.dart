@@ -57,7 +57,7 @@ List<TodoEntity> createTodoList(List data) {
   @override
   Future<bool> saveTodos(List<TodoEntity> todos) async {
     //HttpRequestStatus httpRequestStatus = HttpRequestStatus.NOT_DONE;
-    bool noErrors = true;
+    var noErrors = true;
     final response = await http.get(_todosUrl);
     print(response.body);
     List responseJson = json.decode(response.body.toString());
@@ -98,14 +98,13 @@ List<TodoEntity> createTodoList(List data) {
 
   //Add a todo to the repo
   Future<bool> addTodo(TodoEntity todo) async {
-    bool success = false;
+    var success = false;
     final response = await http.post(_todosUrl,
         headers: _headers, body: json.encode({'task': todo.task, 'complete': todo.complete, 'note': todo.note, 'goal_id': 0, 'key_result_id': 0, 'team_id': 0, 'user_id': 0}));
     if (response.statusCode == 200) {
       print(response.body.toString());
       success = true;
     } else {
-      success = false;
       print('WebClient.addTodo: HTTP Post Request Error');
     }
 
@@ -114,8 +113,8 @@ List<TodoEntity> createTodoList(List data) {
 
   //Update a todo in the repo
   Future<bool> updateTodo(TodoEntity todo) async {
-    bool success = false;
-    int id = int.parse(todo.id);
+    var success = false;
+    var id = int.parse(todo.id);
     final url = '$_todosUrl/$id';
     final response = await http.put(url,
         headers: _headers, body: json.encode({'task': todo.task, 'complete': todo.complete, 'note': todo.note, 'goal_id': 0, 'key_result_id': 0, 'team_id': 0, 'user_id': 0}));
@@ -126,12 +125,13 @@ List<TodoEntity> createTodoList(List data) {
       success = false;
       print('WebClient.updateTodo: unable to update todo');
     }
+    return success;
   }
 
   //Delete a todo from the repo
   Future<bool> deleteTodo(TodoEntity todo) async {
-    bool success = false;
-    int id = int.parse(todo.id);
+    var success = false;
+    var id = int.parse(todo.id);
     final url = '$_todosUrl/$id';
     final response = await http.delete(url, headers: _headers);
     if (response.statusCode == 200) {
