@@ -21,7 +21,7 @@ enum HttpRequestStatus {
 /// a real server but simply emulates the functionality.
 class WebClient implements TodosRepository {
   final Duration delay;
-  static const _todosUrl = 'http://146.115.68.211:8888/todos';
+  static const _todosUrl = 'http://192.168.7.16:8888/todos';
   static final _headers = {'Content-Type': 'application/json'};
 
 
