@@ -21,7 +21,7 @@ enum HttpRequestStatus {
 /// a real server but simply emulates the functionality.
 class WebClient implements TodosRepository {
   final Duration delay;
-  final _todosUrl;
+  final String _todosUrl;
   static final _headers = {'Content-Type': 'application/json'};
 
 
@@ -63,17 +63,20 @@ List<TodoEntity> createTodoList(List data) {
     List responseJson = json.decode(response.body.toString());
     List<TodoEntity> repoList = createTodoList(responseJson);
     List<TodoEntity> temp_todos;
-    //delete first
+    List<TodoEntity> removal_list;
+    //mark for deletion first
     for (var todo in repoList) {
       temp_todos = []..addAll(todos);
       temp_todos.retainWhere((element) => element.id == todo.id);
       if (temp_todos.isEmpty) {
+        removal_list.add(todo);
         if (deleteTodo(todo).toString() == 'false') {
           noErrors = false;
+          print('WebClient.saveTodos error: Could not delete todo: ' + todo.toString());
         }
-        repoList.remove(todo);
       }
     }
+    repoList.removeWhere((todo) => removal_list.contains(todo));
 
     //add and update
     for (var todo in todos) {
@@ -83,6 +86,7 @@ List<TodoEntity> createTodoList(List data) {
         //just update
         if (updateTodo(todo).toString() == 'false') {
           noErrors = false;
+          print('WebClient.saveTodos error: Could not update todo: ' + todo.toString());
         }
 
       }
@@ -90,6 +94,7 @@ List<TodoEntity> createTodoList(List data) {
         //time to add
         if (addTodo(todo).toString() == 'false') {
           noErrors = false;
+          print('WebClient.saveTodos error: Could not add todo: ' + todo.toString());
         }
       }
     }
