@@ -63,7 +63,7 @@ List<TodoEntity> createTodoList(List data) {
     List responseJson = json.decode(response.body.toString());
     List<TodoEntity> repoList = createTodoList(responseJson);
     List<TodoEntity> temp_todos;
-    List<TodoEntity> removal_list;
+    List<TodoEntity> removal_list = [];
     //mark for deletion first
     for (var todo in repoList) {
       temp_todos = [...todos];
