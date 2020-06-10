@@ -66,7 +66,7 @@ List<TodoEntity> createTodoList(List data) {
     List<TodoEntity> removal_list;
     //mark for deletion first
     for (var todo in repoList) {
-      temp_todos = []..addAll(todos);
+      temp_todos = [...todos];
       temp_todos.retainWhere((element) => element.id == todo.id);
       if (temp_todos.isEmpty) {
         removal_list.add(todo);
@@ -80,16 +80,22 @@ List<TodoEntity> createTodoList(List data) {
 
     //add and update
     for (var todo in todos) {
-      temp_todos = []..addAll(repoList);
+      temp_todos = [...repoList];
       temp_todos.retainWhere((element) => element.id == todo.id);
       if (temp_todos.isNotEmpty) {
-        //just update
-        if (updateTodo(todo).toString() == 'false') {
-          noErrors = false;
-          print('WebClient.saveTodos error: Could not update todo: ' + todo.toString());
+        //check if we need to update
+        if (temp_todos[0].complete == todo.complete && temp_todos[0].task == todo.task 
+          && temp_todos[0].note == todo.note) {
+            //no need to update
+          }
+        else {
+          //just update
+          if (updateTodo(todo).toString() == 'false') {
+            noErrors = false;
+            print('WebClient.saveTodos error: Could not update todo: ' + todo.toString());
+          }
         }
-
-      }
+      }// end not-empty-if
       else {
         //time to add
         if (addTodo(todo).toString() == 'false') {
